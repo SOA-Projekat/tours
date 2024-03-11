@@ -23,15 +23,52 @@ func initDB() *gorm.DB {
 	}
 
 	database.AutoMigrate(&model.Student{})
+	database.AutoMigrate(&model.Tour{})
 	//database.Exec("INSERT IGNORE INTO students VALUES ('aec7e123-233d-4a09-a289-75308ea5b7e6', 'Marko Markovic', 'Graficki dizajn')")
 	return database
 }
 
-func startServer(handler *handler.StudentHandler) {
+/*
+	func startServer(handler *handler.StudentHandler) {
+		router := mux.NewRouter().StrictSlash(true)
+
+		router.HandleFunc("/students/{id}", handler.Get).Methods("GET")
+		router.HandleFunc("/students", handler.Create).Methods("POST")
+
+		permitedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
+		permitedOrigins := handlers.AllowedOrigins([]string{"*"})
+		permitedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+
+		router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
+		println("Server starting")
+		log.Fatal(http.ListenAndServe(":8082", handlers.CORS(permitedHeaders, permitedOrigins, permitedMethods)(router)))
+
+}
+*/
+func main() {
+	database := initDB()
+	if database == nil {
+		print("FAILED TO CONNECT TO DB")
+		return
+	}
+	//student example
+	studentRepo := &repo.StudentRepository{DatabaseConnection: database}
+	studentService := &service.StudentService{StudentRepo: studentRepo}
+	studentHandler := &handler.StudentHandler{StudentService: studentService}
+
+	//tour
+	tourRepository := &repo.TourRepository{DatabaseConnection: database}
+	tourService := &service.TourService{TourRepo: tourRepository}
+	tourHandler := &handler.TourHandler{TourService: tourService}
+
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/students/{id}", handler.Get).Methods("GET")
-	router.HandleFunc("/students", handler.Create).Methods("POST")
+	//routes for student
+	router.HandleFunc("/students/{id}", studentHandler.Get).Methods("GET")
+	router.HandleFunc("/students", studentHandler.Create).Methods("POST")
+
+	//routes for tours
+	router.HandleFunc("/tours", tourHandler.Create).Methods("POST")
 
 	permitedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
 	permitedOrigins := handlers.AllowedOrigins([]string{"*"})
@@ -40,18 +77,4 @@ func startServer(handler *handler.StudentHandler) {
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 	println("Server starting")
 	log.Fatal(http.ListenAndServe(":8082", handlers.CORS(permitedHeaders, permitedOrigins, permitedMethods)(router)))
-
-}
-
-func main() {
-	database := initDB()
-	if database == nil {
-		print("FAILED TO CONNECT TO DB")
-		return
-	}
-	repo := &repo.StudentRepository{DatabaseConnection: database}
-	service := &service.StudentService{StudentRepo: repo}
-	handler := &handler.StudentHandler{StudentService: service}
-
-	startServer(handler)
 }
