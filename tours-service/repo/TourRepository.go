@@ -30,3 +30,21 @@ func (repository *TourRepository) CreateTour(tour *model.Tour) error {
 	println("Rows affected: ", dbCreationResult.RowsAffected)
 	return nil
 }
+
+func (repository *TourRepository) GetTourById(id string) (model.Tour, error) {
+	tour := model.Tour{}
+	databaseResult := repository.DatabaseConnection.First(&tour, "id = ?", id)
+	if databaseResult != nil {
+		return tour, databaseResult.Error
+	}
+	return tour, nil
+}
+
+func (repo *TourRepository) GetToursForAuthor(userId int) ([]model.Tour, error) {
+	tours := []model.Tour{}
+	databaseResult := repo.DatabaseConnection.Where("user_id = ?", userId).Find(&tours)
+	if databaseResult != nil {
+		return tours, databaseResult.Error
+	}
+	return tours, nil
+}
