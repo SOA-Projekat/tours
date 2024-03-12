@@ -24,6 +24,7 @@ func initDB() *gorm.DB {
 
 	database.AutoMigrate(&model.Student{})
 	database.AutoMigrate(&model.Tour{})
+	database.AutoMigrate(&model.Equipment{})
 	//database.Exec("INSERT IGNORE INTO students VALUES ('aec7e123-233d-4a09-a289-75308ea5b7e6', 'Marko Markovic', 'Graficki dizajn')")
 	return database
 }
@@ -61,6 +62,11 @@ func main() {
 	tourService := &service.TourService{TourRepo: tourRepository}
 	tourHandler := &handler.TourHandler{TourService: tourService}
 
+	//equipment
+	equipmentRepository := &repo.EquipmentRepository{DatabaseConnection: database}
+	equipmentService := &service.EquipmentService{EquipmentRepo: equipmentRepository}
+	equipmentHandler := &handler.EquipmentHandler{EquipmentService: equipmentService}
+
 	router := mux.NewRouter().StrictSlash(true)
 
 	//routes for student
@@ -73,6 +79,8 @@ func main() {
 	router.HandleFunc("/tours/{userId}", tourHandler.GetToursForAuthor).Methods("GET")
 	router.HandleFunc("/tours", tourHandler.UpdateTour).Methods("PUT")
 
+	//routes for equipment
+	router.HandleFunc("/equipment", equipmentHandler.Create).Methods("POST")
 	permitedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
 	permitedOrigins := handlers.AllowedOrigins([]string{"*"})
 	permitedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
