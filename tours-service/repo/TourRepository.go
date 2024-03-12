@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database-example/model"
+	"encoding/json"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -50,11 +51,56 @@ func (repository *TourRepository) GetToursForAuthor(userId int) ([]model.Tour, e
 }
 
 func (repository *TourRepository) UpdateTour(tour *model.Tour) error {
-	databaseResult := repository.DatabaseConnection.Save(tour)
+	// Convert equipments slice to JSONB before updating
+	equipmentsJSONB, err := json.Marshal(tour.Equipments)
+	if err != nil {
+		return err
+	}
+
+	// Use GORM's Set method to explicitly set the value of the "equipments" field to the JSONB value
+	databaseResult := repository.DatabaseConnection.Model(&model.Tour{}).
+		Where("id = ?", tour.ID).
+		Update("equipments", equipmentsJSONB)
 
 	if databaseResult.Error != nil {
 		return databaseResult.Error
 	}
+
 	println("Rows affected: ", databaseResult.RowsAffected)
 	return nil
+}
+
+func (repository *TourRepository) AddEquipmentToTour(tourID uint, equipmentIDs []uint) error {
+	// Fetch the tour
+	var tour model.Tour
+	if err := repository.DatabaseConnection.First(&tour, tourID).Error; err != nil {
+		return err
+	}
+
+	// Fetch equipment based on equipmentIDs
+	var equipments []model.Equipment
+	if err := repository.DatabaseConnection.Find(&equipments, equipmentIDs).Error; err != nil {
+		return err
+	}
+
+	// Assign the fetched equipment to the tour's Equipments field
+	tour.Equipments = equipments
+
+	// Save the updated tour
+	if err := repository.UpdateTour(&tour); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repository *TourRepository) GetEquipmentForTour(tourID string) ([]model.Equipment, error) {
+	// Fetch the tour with preloaded Equipments
+	var tour model.Tour
+	if err := repository.DatabaseConnection.Preload("Equipments").First(&tour, tourID).Error; err != nil {
+		return nil, err
+	}
+
+	// Return the preloaded Equipments
+	return tour.Equipments, nil
 }

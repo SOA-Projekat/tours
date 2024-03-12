@@ -91,4 +91,51 @@ func (handler *TourHandler) UpdateTour(writer http.ResponseWriter, req *http.Req
 
 }
 
+func (handler *TourHandler) AddEquipmentToTour(writer http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	tourID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(writer, "Invalid tour ID", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch all equipment details
+	allEquipment, err := handler.TourService.GetAllEquipment()
+	if err != nil {
+		http.Error(writer, "Error while fetching all equipment details", http.StatusInternalServerError)
+		return
+	}
+
+	// Extract equipment IDs
+	var equipmentIDs []uint
+	for _, equipment := range allEquipment {
+		equipmentIDs = append(equipmentIDs, uint(equipment.ID))
+	}
+
+	// Add equipment to tour
+	err = handler.TourService.AddEquipmentToTour(uint(tourID), equipmentIDs)
+	if err != nil {
+		http.Error(writer, "Error while adding equipment to tour", http.StatusInternalServerError)
+		return
+	}
+
+	writer.WriteHeader(http.StatusOK)
+	writer.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(writer, "All equipment added to tour with ID %d", tourID)
+}
+
+func (handler *TourHandler) GetEquipmentForTour(writer http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	tourID := vars["id"]
+
+	equipment, err := handler.TourService.GetEquipmentForTour(tourID)
+	if err != nil {
+		http.Error(writer, "Error while getting equipment for tour", http.StatusInternalServerError)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(writer).Encode(equipment)
+}
+
 //TODO: probably keypoint logic is added here i suppose. ask others about opinion
