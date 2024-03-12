@@ -3,6 +3,7 @@ package service
 import (
 	"database-example/model"
 	"database-example/repo"
+	"fmt"
 )
 
 type EquipmentService struct {
@@ -15,4 +16,24 @@ func (service *EquipmentService) CreateEquipment(equipment *model.Equipment) err
 		return err
 	}
 	return nil
+}
+
+func (service *EquipmentService) GetEquipmentById(id string) (*model.Equipment, error) {
+	equipment, err := service.EquipmentRepo.GetEquipmentById(id)
+	if err != nil {
+		return nil, fmt.Errorf(fmt.Sprintf("there are no equipment with id %s created", id))
+	}
+	return &equipment, nil
+}
+
+func (service *EquipmentService) UpdateEquipment(equipment *model.Equipment) error {
+	err := service.EquipmentRepo.UpdateEquipment(equipment)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (service *EquipmentService) DeleteEquipment(id int) error {
+	return service.EquipmentRepo.DeleteEquipment(id)
 }

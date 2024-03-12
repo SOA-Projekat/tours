@@ -80,7 +80,11 @@ func main() {
 	router.HandleFunc("/tours", tourHandler.UpdateTour).Methods("PUT")
 
 	//routes for equipment
-	router.HandleFunc("/equipment", equipmentHandler.Create).Methods("POST")
+	router.HandleFunc("/equipments", equipmentHandler.Create).Methods("POST")
+	router.HandleFunc("/equipment/{id}", equipmentHandler.GetEquipmentById).Methods("GET")
+	router.HandleFunc("/equipments", equipmentHandler.UpdateEquipment).Methods("PUT")
+	router.HandleFunc("/equipment/{id}", equipmentHandler.DeleteEquipment).Methods("DELETE")
+
 	permitedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
 	permitedOrigins := handlers.AllowedOrigins([]string{"*"})
 	permitedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})

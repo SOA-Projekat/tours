@@ -30,11 +30,30 @@ func (repository *EquipmentRepository) CreateEquipment(equipment *model.Equipmen
 	return nil
 }
 
-func (repository *TourRepository) GetEquipmentById(id string) (model.Equipment, error) {
+func (repository *EquipmentRepository) GetEquipmentById(id string) (model.Equipment, error) {
 	equipment := model.Equipment{}
 	databaseResult := repository.DatabaseConnection.First(&equipment, "id = ?", id)
 	if databaseResult != nil {
 		return equipment, databaseResult.Error
 	}
 	return equipment, nil
+}
+
+func (repository *EquipmentRepository) UpdateEquipment(equipment *model.Equipment) error {
+	databaseResult := repository.DatabaseConnection.Save(equipment)
+
+	if databaseResult.Error != nil {
+		return databaseResult.Error
+	}
+	println("Rows affected: ", databaseResult.RowsAffected)
+	return nil
+}
+
+func (repository *EquipmentRepository) DeleteEquipment(id int) error {
+	result := repository.DatabaseConnection.Delete(&model.Equipment{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	println("Rows affected: ", result.RowsAffected)
+	return nil
 }
