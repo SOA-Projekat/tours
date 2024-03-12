@@ -70,4 +70,25 @@ func (handler *TourHandler) GetToursForAuthor(writer http.ResponseWriter, req *h
 	json.NewEncoder(writer).Encode(tours)
 }
 
+func (handler *TourHandler) UpdateTour(writer http.ResponseWriter, req *http.Request) {
+	var tour model.Tour
+
+	err := json.NewDecoder(req.Body).Decode(&tour)
+	if err != nil {
+		println("error occured whiule parsing json")
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = handler.TourService.UpdateTour(&tour)
+	if err != nil {
+		println("error occured while updating tour")
+		writer.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+	writer.WriteHeader(http.StatusOK)
+	writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(writer).Encode(tour)
+
+}
+
 //TODO: probably keypoint logic is added here i suppose. ask others about opinion

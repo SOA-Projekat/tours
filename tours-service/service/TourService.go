@@ -34,3 +34,11 @@ func (service *TourService) GetToursForAuthor(userId int) (*[]model.Tour, error)
 	}
 	return &tours, nil
 }
+
+func (service *TourService) UpdateTour(tour *model.Tour) error {
+	err := service.TourRepo.UpdateTour(tour)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -71,6 +71,7 @@ func main() {
 	router.HandleFunc("/tours", tourHandler.Create).Methods("POST")
 	router.HandleFunc("/tour/{id}", tourHandler.GetTourById).Methods("GET")
 	router.HandleFunc("/tours/{userId}", tourHandler.GetToursForAuthor).Methods("GET")
+	router.HandleFunc("/tours", tourHandler.UpdateTour).Methods("PUT")
 
 	permitedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
 	permitedOrigins := handlers.AllowedOrigins([]string{"*"})

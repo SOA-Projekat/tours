@@ -40,11 +40,21 @@ func (repository *TourRepository) GetTourById(id string) (model.Tour, error) {
 	return tour, nil
 }
 
-func (repo *TourRepository) GetToursForAuthor(userId int) ([]model.Tour, error) {
+func (repository *TourRepository) GetToursForAuthor(userId int) ([]model.Tour, error) {
 	tours := []model.Tour{}
-	databaseResult := repo.DatabaseConnection.Where("user_id = ?", userId).Find(&tours)
+	databaseResult := repository.DatabaseConnection.Where("user_id = ?", userId).Find(&tours)
 	if databaseResult != nil {
 		return tours, databaseResult.Error
 	}
 	return tours, nil
+}
+
+func (repository *TourRepository) UpdateTour(tour *model.Tour) error {
+	databaseResult := repository.DatabaseConnection.Save(tour)
+
+	if databaseResult.Error != nil {
+		return databaseResult.Error
+	}
+	println("Rows affected: ", databaseResult.RowsAffected)
+	return nil
 }
