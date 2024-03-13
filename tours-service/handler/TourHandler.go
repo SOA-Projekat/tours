@@ -99,21 +99,16 @@ func (handler *TourHandler) AddEquipmentToTour(writer http.ResponseWriter, req *
 		return
 	}
 
-	// Fetch all equipment details
-	allEquipment, err := handler.TourService.GetAllEquipment()
+	var request struct {
+		EquipmentIDs []uint `json:"equipmentIDs"`
+	}
+	err = json.NewDecoder(req.Body).Decode(&request)
 	if err != nil {
-		http.Error(writer, "Error while fetching all equipment details", http.StatusInternalServerError)
+		http.Error(writer, "Failed to parse request body", http.StatusBadRequest)
 		return
 	}
 
-	// Extract equipment IDs
-	var equipmentIDs []uint
-	for _, equipment := range allEquipment {
-		equipmentIDs = append(equipmentIDs, uint(equipment.ID))
-	}
-
-	// Add equipment to tour
-	err = handler.TourService.AddEquipmentToTour(uint(tourID), equipmentIDs)
+	err = handler.TourService.AddEquipmentToTour(uint(tourID), request.EquipmentIDs)
 	if err != nil {
 		http.Error(writer, "Error while adding equipment to tour", http.StatusInternalServerError)
 		return
@@ -121,7 +116,7 @@ func (handler *TourHandler) AddEquipmentToTour(writer http.ResponseWriter, req *
 
 	writer.WriteHeader(http.StatusOK)
 	writer.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(writer, "All equipment added to tour with ID %d", tourID)
+	fmt.Fprintf(writer, "Equipment added to tour with ID %d", tourID)
 }
 
 func (handler *TourHandler) GetEquipmentForTour(writer http.ResponseWriter, req *http.Request) {
