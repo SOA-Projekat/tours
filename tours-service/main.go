@@ -25,6 +25,7 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Student{})
 	database.AutoMigrate(&model.Tour{})
 	database.AutoMigrate(&model.Equipment{})
+	database.AutoMigrate(&model.TourPoint{})
 	return database
 }
 
@@ -52,6 +53,12 @@ func main() {
 	}
 	tourHandler := &handler.TourHandler{TourService: tourService}
 
+	//tourPoint
+
+	tourPointRepository := &repo.TourPointRepository{DatabaseConnection: database}
+	tourPointService := &service.TourPointService{TourPointRepo: tourPointRepository}
+	tourPointHandler := &handler.TourPointHandler{TourPointService: tourPointService}
+
 	router := mux.NewRouter().StrictSlash(true)
 
 	//routes for student
@@ -72,6 +79,10 @@ func main() {
 
 	//routes for tour-equipment relations
 	router.HandleFunc("/tours/{tourID}/equipments/{equipmentID}", tourHandler.AddEquipmentToTour).Methods("POST")
+
+	//routes for tourPoints
+	router.HandleFunc("/tourPoints", tourPointHandler.Create).Methods("POST")
+	router.HandleFunc("/tours/{tourId}/points", tourPointHandler.GetTourPoints).Methods("GET")
 
 	permitedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
 	permitedOrigins := handlers.AllowedOrigins([]string{"*"})
