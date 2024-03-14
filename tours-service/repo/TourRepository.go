@@ -52,11 +52,13 @@ func (repository *TourRepository) GetToursForAuthor(userId int) ([]model.Tour, e
 }
 
 func (repository *TourRepository) UpdateTour(tour *model.Tour) error {
+	// Convert equipments slice to JSONB before updating
 	equipmentsJSONB, err := json.Marshal(tour.Equipments)
 	if err != nil {
 		return err
 	}
 
+	// Use GORM's Set method to explicitly set the value of the "equipments" field to the JSONB value
 	databaseResult := repository.DatabaseConnection.Model(&model.Tour{}).
 		Where("id = ?", tour.ID).
 		Update("equipments", equipmentsJSONB)
@@ -70,18 +72,22 @@ func (repository *TourRepository) UpdateTour(tour *model.Tour) error {
 }
 
 func (repository *TourRepository) AddEquipmentToTour(tourID uint, equipmentIDs []uint) error {
+	// Fetch the tour
 	var tour model.Tour
 	if err := repository.DatabaseConnection.First(&tour, tourID).Error; err != nil {
 		return err
 	}
 
+	// Fetch equipment based on equipmentIDs
 	var equipments []model.Equipment
 	if err := repository.DatabaseConnection.Find(&equipments, equipmentIDs).Error; err != nil {
 		return err
 	}
 
+	// Assign the fetched equipment to the tour's Equipments field
 	tour.Equipments = equipments
 
+	// Save the updated tour
 	if err := repository.UpdateTour(&tour); err != nil {
 		return err
 	}
@@ -89,15 +95,18 @@ func (repository *TourRepository) AddEquipmentToTour(tourID uint, equipmentIDs [
 	return nil
 }
 func (repository *TourRepository) GetEquipmentForTour(tourID string) ([]model.Equipment, error) {
+	// Query the database to fetch the JSONB data for equipments
 	var equipmentsJSON sql.NullString
 	if err := repository.DatabaseConnection.Raw("SELECT equipments FROM tours WHERE id = ?", tourID).Scan(&equipmentsJSON).Error; err != nil {
 		return nil, fmt.Errorf("failed to fetch equipment data for tour with ID %s: %v", tourID, err)
 	}
 
+	// Check if the equipmentsJSON is NULL
 	if !equipmentsJSON.Valid {
 		return nil, fmt.Errorf("equipment data for tour with ID %s is null", tourID)
 	}
 
+	// Unmarshal the JSONB data into a slice of model.Equipment
 	var equipments []model.Equipment
 	if err := json.Unmarshal([]byte(equipmentsJSON.String), &equipments); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal equipment data: %v", err)
