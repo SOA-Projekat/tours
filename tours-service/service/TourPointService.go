@@ -21,3 +21,15 @@ func (service *TourPointService) Create(tourPoint *model.TourPoint) error {
 func (service *TourPointService) GetTourPointsByTourId(tourId int) ([]model.TourPoint, error) {
 	return service.TourPointRepo.GetTourPointsByTourId(tourId)
 }
+
+func (service *TourPointService) UpdateTourPoint(tourPoint *model.TourPoint) error {
+	err := service.TourPointRepo.UpdateTourPoint(tourPoint)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (service *TourPointService) DeleteTourPoint(id int) error {
+	return service.TourPointRepo.DeleteTourPoint(id)
+}

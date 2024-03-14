@@ -83,6 +83,8 @@ func main() {
 	//routes for tourPoints
 	router.HandleFunc("/tourPoints", tourPointHandler.Create).Methods("POST")
 	router.HandleFunc("/tours/{tourId}/points", tourPointHandler.GetTourPoints).Methods("GET")
+	router.HandleFunc("/tourPoints", tourPointHandler.UpdateTourPoint).Methods("PUT")
+	router.HandleFunc("/tourPoints/{id}", tourPointHandler.DeleteTourPoint).Methods("DELETE")
 
 	permitedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
 	permitedOrigins := handlers.AllowedOrigins([]string{"*"})

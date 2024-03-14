@@ -35,3 +35,22 @@ func (repo *TourPointRepository) GetTourPointsByTourId(tourId int) ([]model.Tour
 	}
 	return tourPoints, nil
 }
+
+func (repo *TourPointRepository) UpdateTourPoint(tourPoint *model.TourPoint) error {
+	databaseResult := repo.DatabaseConnection.Save(tourPoint)
+
+	if databaseResult.Error != nil {
+		return databaseResult.Error
+	}
+	println("Rows affected: ", databaseResult.RowsAffected)
+	return nil
+}
+
+func (repository *TourPointRepository) DeleteTourPoint(id int) error {
+	result := repository.DatabaseConnection.Delete(&model.TourPoint{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	println("Rows affected: ", result.RowsAffected)
+	return nil
+}
