@@ -11,6 +11,7 @@ type EquipmentService struct {
 }
 
 func (service *EquipmentService) CreateEquipment(equipment *model.Equipment) error {
+	// Attempt to create the equipment using the repository
 	err := service.EquipmentRepo.CreateEquipment(equipment)
 	if err != nil {
 		return err

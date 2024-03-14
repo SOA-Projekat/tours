@@ -58,3 +58,29 @@ func (repository *TourRepository) UpdateTour(tour *model.Tour) error {
 	println("Rows affected: ", databaseResult.RowsAffected)
 	return nil
 }
+
+func (repository *TourRepository) AddEquipmentToTour(tourID int, equipmentID int) error {
+	// Retrieve the tour by its ID
+	var tour model.Tour
+	if err := repository.DatabaseConnection.First(&tour, tourID).Error; err != nil {
+		return fmt.Errorf("failed to find tour with ID %d: %w", tourID, err)
+	}
+
+	// Retrieve the equipment by its ID
+	var equipment model.Equipment
+	if err := repository.DatabaseConnection.First(&equipment, equipmentID).Error; err != nil {
+		return fmt.Errorf("failed to find equipment with ID %d: %w", equipmentID, err)
+	}
+
+	// Set the TourID of the equipment to the provided tourID
+	equipment.TourID = tourID
+
+	// Add the equipment to the tour's equipments slice
+	tour.Equipments = append(tour.Equipments, equipment)
+
+	if err := repository.DatabaseConnection.Save(&tour).Error; err != nil {
+		return fmt.Errorf("failed to update tour with ID %d: %w", tourID, err)
+	}
+
+	return nil
+}

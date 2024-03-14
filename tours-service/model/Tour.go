@@ -33,10 +33,10 @@ type Tour struct {
 	DifficultyLevel DifficultyLevel `json:"difficulty"`
 	Description     string          `json:"description"`
 	//Tags            []string        `json:"tags"`
-	Status TourStatus `json:"status"`
-	Price  int        `json:"price"`
-	UserID int        `json:"userId"`
-
+	Status     TourStatus  `json:"status"`
+	Price      int         `json:"price"`
+	UserID     int         `json:"userId"`
+	Equipments []Equipment `json:"equipments" gorm:"foreignKey:TourID"`
 	//ovo posle dodavati po potrebi msm (videti jos sa ostalima)
 	//PublishedDateTime *time.Time
 	//ArchivedDateTime  *time.Time

@@ -42,3 +42,11 @@ func (service *TourService) UpdateTour(tour *model.Tour) error {
 	}
 	return nil
 }
+
+func (service *TourService) AddEquipmentToTour(tourID int, equipmentID int) error {
+	err := service.TourRepo.AddEquipmentToTour(tourID, equipmentID)
+	if err != nil {
+		return err
+	}
+	return nil
+}

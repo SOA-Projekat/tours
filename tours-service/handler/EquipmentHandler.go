@@ -17,23 +17,29 @@ type EquipmentHandler struct {
 
 func (handler *EquipmentHandler) Create(writer http.ResponseWriter, req *http.Request) {
 	var equipment model.Equipment
+	// Decode the JSON request body into an equipment object
 	err := json.NewDecoder(req.Body).Decode(&equipment)
 	if err != nil {
+		// Handle JSON parsing error
 		println("error while parsing json")
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	// Attempt to create the equipment using the service
 	err = handler.EquipmentService.CreateEquipment(&equipment)
 	if err != nil {
-		println("error while creting equipment")
-		writer.WriteHeader(http.StatusExpectationFailed)
+		// Handle equipment creation error
+		println("error while creating equipment")
+		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	// Write success response
 	writer.WriteHeader(http.StatusCreated)
-	writer.Header().Set("Content-Tpe", "application/json")
+	writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(writer).Encode(equipment)
 }
-
 func (handler *EquipmentHandler) GetEquipmentById(writer http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	equipment, err := handler.EquipmentService.GetEquipmentById(id)

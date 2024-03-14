@@ -91,4 +91,35 @@ func (handler *TourHandler) UpdateTour(writer http.ResponseWriter, req *http.Req
 
 }
 
+func (handler *TourHandler) AddEquipmentToTour(writer http.ResponseWriter, req *http.Request) {
+	// Extract tour ID and equipment ID from the request parameters
+	tourID := mux.Vars(req)["tourID"]
+	equipmentID := mux.Vars(req)["equipmentID"]
+
+	// Convert IDs to integers
+	tourIDInt, err := strconv.Atoi(tourID)
+	if err != nil {
+		log.Printf("Invalid tour ID: %s", tourID)
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	equipmentIDInt, err := strconv.Atoi(equipmentID)
+	if err != nil {
+		log.Printf("Invalid equipment ID: %s", equipmentID)
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Call the TourService method to add equipment to the tour
+	err = handler.TourService.AddEquipmentToTour(tourIDInt, equipmentIDInt)
+	if err != nil {
+		log.Printf("Error adding equipment to tour: %v", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with success status
+	writer.WriteHeader(http.StatusOK)
+}
+
 //TODO: probably keypoint logic is added here i suppose. ask others about opinion

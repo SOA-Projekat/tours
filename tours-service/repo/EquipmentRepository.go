@@ -11,22 +11,22 @@ type EquipmentRepository struct {
 	DatabaseConnection *gorm.DB
 }
 
+// EquipmentRepository
 func (repository *EquipmentRepository) CreateEquipment(equipment *model.Equipment) error {
-	var maximumId uint
-	result := repository.DatabaseConnection.Model(&model.Equipment{}).Select("COALESCE(MAX(id),0)").Scan((&maximumId))
-	if result.Error != nil {
-		fmt.Println("couldnt find maximum id")
+	// Check if the referenced tour exists before creating the equipment
+	var count int64
+	repository.DatabaseConnection.Model(&model.Tour{}).Where("id = ?", equipment.TourID).Count(&count)
+	if count == 0 {
+		return fmt.Errorf("failed to create equipment: tour with ID %d does not exist", equipment.TourID)
 	}
-	fmt.Printf("maximum id is %d\n", maximumId)
 
-	equipment.ID = int(maximumId) + 1
-
+	// Attempt to create the equipment in the database
 	databaseCreationResult := repository.DatabaseConnection.Create(equipment)
-	if databaseCreationResult != nil {
-		return databaseCreationResult.Error
+	if databaseCreationResult.Error != nil {
+		return fmt.Errorf("failed to create equipment: %v", databaseCreationResult.Error)
 	}
 
-	println("Rows affected: ", databaseCreationResult.RowsAffected)
+	fmt.Printf("Equipment created with ID: %d\n", equipment.ID)
 	return nil
 }
 
