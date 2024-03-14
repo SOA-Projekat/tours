@@ -2,7 +2,6 @@ package repo
 
 import (
 	"database-example/model"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 
@@ -94,23 +93,14 @@ func (repository *TourRepository) AddEquipmentToTour(tourID uint, equipmentIDs [
 
 	return nil
 }
+
 func (repository *TourRepository) GetEquipmentForTour(tourID string) ([]model.Equipment, error) {
-	// Query the database to fetch the JSONB data for equipments
-	var equipmentsJSON sql.NullString
-	if err := repository.DatabaseConnection.Raw("SELECT equipments FROM tours WHERE id = ?", tourID).Scan(&equipmentsJSON).Error; err != nil {
-		return nil, fmt.Errorf("failed to fetch equipment data for tour with ID %s: %v", tourID, err)
+	// Fetch the tour with preloaded Equipments
+	var tour model.Tour
+	if err := repository.DatabaseConnection.Preload("Equipments").First(&tour, tourID).Error; err != nil {
+		return nil, err
 	}
 
-	// Check if the equipmentsJSON is NULL
-	if !equipmentsJSON.Valid {
-		return nil, fmt.Errorf("equipment data for tour with ID %s is null", tourID)
-	}
-
-	// Unmarshal the JSONB data into a slice of model.Equipment
-	var equipments []model.Equipment
-	if err := json.Unmarshal([]byte(equipmentsJSON.String), &equipments); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal equipment data: %v", err)
-	}
-
-	return equipments, nil
+	// Return the preloaded Equipments
+	return tour.Equipments, nil
 }
