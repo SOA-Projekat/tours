@@ -57,3 +57,11 @@ func (repository *EquipmentRepository) DeleteEquipment(id int) error {
 	println("Rows affected: ", result.RowsAffected)
 	return nil
 }
+
+func (repository *EquipmentRepository) GetEquipmentByTourID(tourID int) ([]model.Equipment, error) {
+	var equipments []model.Equipment
+	if err := repository.DatabaseConnection.Find(&equipments, "tour_id = ?", tourID).Error; err != nil {
+		return nil, err
+	}
+	return equipments, nil
+}

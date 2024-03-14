@@ -39,15 +39,18 @@ func main() {
 	studentService := &service.StudentService{StudentRepo: studentRepo}
 	studentHandler := &handler.StudentHandler{StudentService: studentService}
 
-	//tour
-	tourRepository := &repo.TourRepository{DatabaseConnection: database}
-	tourService := &service.TourService{TourRepo: tourRepository}
-	tourHandler := &handler.TourHandler{TourService: tourService}
-
 	//equipment
 	equipmentRepository := &repo.EquipmentRepository{DatabaseConnection: database}
 	equipmentService := &service.EquipmentService{EquipmentRepo: equipmentRepository}
 	equipmentHandler := &handler.EquipmentHandler{EquipmentService: equipmentService}
+
+	//tour
+	tourRepository := &repo.TourRepository{DatabaseConnection: database}
+	tourService := &service.TourService{
+		TourRepo:      tourRepository,
+		EquipmentRepo: equipmentRepository,
+	}
+	tourHandler := &handler.TourHandler{TourService: tourService}
 
 	router := mux.NewRouter().StrictSlash(true)
 

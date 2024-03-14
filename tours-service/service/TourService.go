@@ -8,7 +8,8 @@ import (
 )
 
 type TourService struct {
-	TourRepo *repo.TourRepository
+	TourRepo      *repo.TourRepository
+	EquipmentRepo *repo.EquipmentRepository
 }
 
 func (service *TourService) CreateTour(tour *model.Tour) error {
@@ -24,6 +25,12 @@ func (service *TourService) GetTourById(id string) (*model.Tour, error) {
 	if err != nil {
 		return nil, fmt.Errorf(fmt.Sprintf("tour with id %s is not found", id))
 	}
+	equipments, err := service.EquipmentRepo.GetEquipmentByTourID(tour.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	tour.Equipments = equipments
 	return &tour, nil
 }
 
