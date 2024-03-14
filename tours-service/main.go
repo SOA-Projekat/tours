@@ -25,64 +25,71 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Student{})
 	database.AutoMigrate(&model.Tour{})
 	database.AutoMigrate(&model.Equipment{})
-
 	//database.Exec("INSERT IGNORE INTO students VALUES ('aec7e123-233d-4a09-a289-75308ea5b7e6', 'Marko Markovic', 'Graficki dizajn')")
 	return database
 }
 
+/*
+	func startServer(handler *handler.StudentHandler) {
+		router := mux.NewRouter().StrictSlash(true)
+
+		router.HandleFunc("/students/{id}", handler.Get).Methods("GET")
+		router.HandleFunc("/students", handler.Create).Methods("POST")
+
+		permitedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
+		permitedOrigins := handlers.AllowedOrigins([]string{"*"})
+		permitedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+
+		router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
+		println("Server starting")
+		log.Fatal(http.ListenAndServe(":8082", handlers.CORS(permitedHeaders, permitedOrigins, permitedMethods)(router)))
+
+}
+*/
 func main() {
 	database := initDB()
 	if database == nil {
 		print("FAILED TO CONNECT TO DB")
 		return
 	}
-
-	// Repositories
+	//student example
 	studentRepo := &repo.StudentRepository{DatabaseConnection: database}
-	tourRepository := &repo.TourRepository{DatabaseConnection: database}
-	equipmentRepository := &repo.EquipmentRepository{DatabaseConnection: database}
-
-	// Services
 	studentService := &service.StudentService{StudentRepo: studentRepo}
-	tourService := &service.TourService{
-		TourRepo:      tourRepository,
-		EquipmentRepo: equipmentRepository, // Pass equipment repository
-	}
-	equipmentService := &service.EquipmentService{EquipmentRepo: equipmentRepository}
-
-	// Handlers
 	studentHandler := &handler.StudentHandler{StudentService: studentService}
+
+	//tour
+	tourRepository := &repo.TourRepository{DatabaseConnection: database}
+	tourService := &service.TourService{TourRepo: tourRepository}
 	tourHandler := &handler.TourHandler{TourService: tourService}
+
+	//equipment
+	equipmentRepository := &repo.EquipmentRepository{DatabaseConnection: database}
+	equipmentService := &service.EquipmentService{EquipmentRepo: equipmentRepository}
 	equipmentHandler := &handler.EquipmentHandler{EquipmentService: equipmentService}
 
-	// Router setup
 	router := mux.NewRouter().StrictSlash(true)
 
-	// Routes for students
+	//routes for student
 	router.HandleFunc("/students/{id}", studentHandler.Get).Methods("GET")
 	router.HandleFunc("/students", studentHandler.Create).Methods("POST")
 
-	// Routes for tours
+	//routes for tours
 	router.HandleFunc("/tours", tourHandler.Create).Methods("POST")
 	router.HandleFunc("/tour/{id}", tourHandler.GetTourById).Methods("GET")
 	router.HandleFunc("/tours/{userId}", tourHandler.GetToursForAuthor).Methods("GET")
 	router.HandleFunc("/tours", tourHandler.UpdateTour).Methods("PUT")
-	router.HandleFunc("/tours/{id}/equipments", tourHandler.AddEquipmentToTour).Methods("POST")
-	router.HandleFunc("/tour/{id}/equipment", tourHandler.GetEquipmentForTour).Methods("GET")
 
-	// Routes for equipment
+	//routes for equipment
 	router.HandleFunc("/equipments", equipmentHandler.Create).Methods("POST")
 	router.HandleFunc("/equipment/{id}", equipmentHandler.GetEquipmentById).Methods("GET")
 	router.HandleFunc("/equipments", equipmentHandler.UpdateEquipment).Methods("PUT")
 	router.HandleFunc("/equipment/{id}", equipmentHandler.DeleteEquipment).Methods("DELETE")
 
-	// CORS setup
-	permittedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
-	permittedOrigins := handlers.AllowedOrigins([]string{"*"})
-	permittedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	permitedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
+	permitedOrigins := handlers.AllowedOrigins([]string{"*"})
+	permitedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 
-	// Start server
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 	println("Server starting")
-	log.Fatal(http.ListenAndServe(":8082", handlers.CORS(permittedHeaders, permittedOrigins, permittedMethods)(router)))
+	log.Fatal(http.ListenAndServe(":8082", handlers.CORS(permitedHeaders, permitedOrigins, permitedMethods)(router)))
 }

@@ -8,8 +8,7 @@ import (
 )
 
 type TourService struct {
-	TourRepo      *repo.TourRepository
-	EquipmentRepo *repo.EquipmentRepository
+	TourRepo *repo.TourRepository
 }
 
 func (service *TourService) CreateTour(tour *model.Tour) error {
@@ -42,28 +41,4 @@ func (service *TourService) UpdateTour(tour *model.Tour) error {
 		return err
 	}
 	return nil
-}
-
-func (service *TourService) AddEquipmentToTour(tourID uint, equipmentIDs []uint) error {
-	err := service.TourRepo.AddEquipmentToTour(tourID, equipmentIDs)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (service *TourService) GetEquipmentForTour(tourID string) ([]model.Equipment, error) {
-	equipment, err := service.TourRepo.GetEquipmentForTour(tourID)
-	if err != nil {
-		return nil, err
-	}
-	return equipment, nil
-}
-
-func (service *TourService) GetAllEquipment() ([]model.Equipment, error) {
-	allEquipment, err := service.EquipmentRepo.GetAllEquipment()
-	if err != nil {
-		return nil, err
-	}
-	return allEquipment, nil
 }
