@@ -37,6 +37,7 @@ type Tour struct {
 	Price      int         `json:"price"`
 	UserID     int         `json:"userId"`
 	Equipments []Equipment `json:"equipments" gorm:"foreignKey:TourID"`
+	TourPoints []TourPoint `json:"keypoints" gorm:"foreighKey:TourId"`
 	//ovo posle dodavati po potrebi msm (videti jos sa ostalima)
 	//PublishedDateTime *time.Time
 	//ArchivedDateTime  *time.Time

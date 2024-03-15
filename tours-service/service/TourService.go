@@ -10,6 +10,7 @@ import (
 type TourService struct {
 	TourRepo      *repo.TourRepository
 	EquipmentRepo *repo.EquipmentRepository
+	TourPointRepo *repo.TourPointRepository
 }
 
 func (service *TourService) CreateTour(tour *model.Tour) error {
@@ -31,6 +32,12 @@ func (service *TourService) GetTourById(id string) (*model.Tour, error) {
 	}
 
 	tour.Equipments = equipments
+
+	tourPoints, err := service.TourPointRepo.GetTourPointsByTourId(tour.ID)
+	if err != nil {
+		return nil, err
+	}
+	tour.TourPoints = tourPoints
 	return &tour, nil
 }
 
