@@ -41,14 +41,40 @@ func (service *TourService) GetTourById(id string) (*model.Tour, error) {
 	return &tour, nil
 }
 
-func (service *TourService) GetToursForAuthor(userId int) (*[]model.Tour, error) {
+func (service *TourService) GetToursForAuthor(userId int) ([]model.Tour, error) {
 	tours, err := service.TourRepo.GetToursForAuthor(userId)
 	if err != nil {
-		return nil, fmt.Errorf(fmt.Sprintf("there are no tours which user with id %d created", userId))
+		return nil, fmt.Errorf("there are no tours which user with id %d created: %v", userId, err)
 	}
-	return &tours, nil
+
+	for i := range tours {
+		// Fetch and assign equipments to each tour
+		equipments, err := service.EquipmentRepo.GetEquipmentByTourID(tours[i].ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get equipments for tour %d: %v", tours[i].ID, err)
+		}
+		tours[i].Equipments = equipments
+
+		// Fetch and assign tour points to each tour
+		tourPoints, err := service.TourPointRepo.GetTourPointsByTourId(tours[i].ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get tour points for tour %d: %v", tours[i].ID, err)
+		}
+		tours[i].TourPoints = tourPoints
+	}
+
+	return tours, nil
 }
 
+/*
+	func (service *TourService) GetToursForAuthor(userId int) (*[]model.Tour, error) {
+		tours, err := service.TourRepo.GetToursForAuthor(userId)
+		if err != nil {
+			return nil, fmt.Errorf(fmt.Sprintf("there are no tours which user with id %d created", userId))
+		}
+		return &tours, nil
+	}
+*/
 func (service *TourService) UpdateTour(tour *model.Tour) error {
 	err := service.TourRepo.UpdateTour(tour)
 	if err != nil {
