@@ -71,6 +71,7 @@ func main() {
 	router.HandleFunc("/tour/{id}", tourHandler.GetTourById).Methods("GET")
 	router.HandleFunc("/tours/{userId}", tourHandler.GetToursForAuthor).Methods("GET")
 	router.HandleFunc("/tours", tourHandler.UpdateTour).Methods("PUT")
+	router.HandleFunc("/tour/publish/{tourID}", tourHandler.PublishTour).Methods("PUT")
 
 	//routes for equipment
 	router.HandleFunc("/equipments", equipmentHandler.Create).Methods("POST")

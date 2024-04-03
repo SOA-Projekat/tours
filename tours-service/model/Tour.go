@@ -4,7 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
-	//"time"
+	"time"
 )
 
 // TourStatus represents the status of a tour.
@@ -28,20 +28,18 @@ const (
 
 // Tour represents a tour entity.
 type Tour struct {
-	ID              int             `json:"id"`
-	Name            string          `json:"name"`
-	DifficultyLevel DifficultyLevel `json:"difficulty"`
-	Description     string          `json:"description"`
-	Status          TourStatus      `json:"status"`
-	Price           int             `json:"price"`
-	UserID          int             `json:"userId"`
-	Equipments      []Equipment     `json:"equipments" gorm:"foreignKey:TourID" `
-	TourPoints      []TourPoint     `json:"tourpoints" gorm:"foreignKey:TourId"`
-	//Tags            []string        `json:"tags"`
-	//ovo posle dodavati po potrebi msm (videti jos sa ostalima)
-	//PublishedDateTime *time.Time
-	//ArchivedDateTime  *time.Time
-	//TourPoints         []TourPoint
+	ID                int             `json:"id"`
+	Name              string          `json:"name"`
+	DifficultyLevel   DifficultyLevel `json:"difficulty"`
+	Description       string          `json:"description"`
+	Status            TourStatus      `json:"status"`
+	Price             int             `json:"price"`
+	UserID            int             `json:"userId"`
+	Equipments        []Equipment     `json:"equipments" gorm:"foreignKey:TourID" `
+	TourPoints        []TourPoint     `json:"tourpoints" gorm:"foreignKey:TourId"`
+	Tags              StringArray     `json:"tags"`
+	PublishedDateTime time.Time       `json:"publishedDateTime,omitempty"`
+	ArchivedDateTime  time.Time       `json:"archivedDateTime,omitempty"`
 	//TourCharacteristics []TourCharacteristic
 	//TourReviews        []TourReview
 }

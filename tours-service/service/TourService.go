@@ -3,7 +3,9 @@ package service
 import (
 	"database-example/model"
 	"database-example/repo"
+	"errors"
 	"fmt"
+	"time"
 	//"fmt"
 )
 
@@ -89,4 +91,62 @@ func (service *TourService) AddEquipmentToTour(tourID int, equipmentID int) erro
 		return err
 	}
 	return nil
+}
+
+// func (service *TourService) PublishTour(tourID string) error {
+// 	tour, err := service.TourRepo.GetTourById(tourID)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	// Postavljanje vremena objavljivanja na trenutno vreme
+// 	currentTime := time.Now()
+// 	tour.PublishedDateTime = &currentTime
+
+// 	// Ažuriranje ture u repozitorijumu
+// 	err = service.TourRepo.UpdateTour(&tour)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+func (service *TourService) PublishTour(tourID string) (*model.Tour, error) {
+	//tour, err := service.TourRepo.GetTourById(tourID)
+	tour, err := service.GetTourById(tourID)
+	if err != nil {
+		return nil, err
+	}
+	if tour.Name == "" {
+		return nil, errors.New("tour must have a name to be published")
+	}
+	if tour.Description == "" {
+		return nil, errors.New("tour must have a description to be published")
+	}
+	if tour.DifficultyLevel < 0 || tour.DifficultyLevel > 2 {
+		return nil, errors.New("tour must have a valid difficulty level to be published")
+	}
+	if len(tour.Tags) == 0 {
+		return nil, errors.New("tour must have at least one tag to be published")
+	}
+	if len(tour.TourPoints) < 2 {
+		fmt.Println("Number of tour points: ", len(tour.TourPoints))
+		return nil, errors.New("tour must have at least two key points to be published")
+	}
+	if tour.Status != 0 {
+		return nil, errors.New("tour can be published only if its currently in draft phase")
+	}
+	// Postavljanje vremena arhiviranja na trenutno vreme
+	currentTime := time.Now()
+	tour.PublishedDateTime = currentTime
+	tour.Status = 1
+
+	// Ažuriranje ture u repozitorijumu
+	err = service.TourRepo.UpdateTour(tour)
+	if err != nil {
+		return nil, err
+	}
+
+	return tour, nil
 }

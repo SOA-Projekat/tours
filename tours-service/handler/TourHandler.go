@@ -122,4 +122,18 @@ func (handler *TourHandler) AddEquipmentToTour(writer http.ResponseWriter, req *
 	writer.WriteHeader(http.StatusOK)
 }
 
+func (handler *TourHandler) PublishTour(writer http.ResponseWriter, req *http.Request) {
+	tourID := mux.Vars(req)["tourID"]
+	tour, err := handler.TourService.PublishTour(tourID)
+	if err != nil {
+		log.Printf("Error while publishing %v", err)
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	writer.WriteHeader(http.StatusOK)
+	writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(writer).Encode(tour)
+}
+
 //TODO: probably keypoint logic is added here i suppose. ask others about opinion
