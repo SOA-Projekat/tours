@@ -69,9 +69,11 @@ func main() {
 	//routes for tours
 	router.HandleFunc("/tours", tourHandler.Create).Methods("POST")
 	router.HandleFunc("/tour/{id}", tourHandler.GetTourById).Methods("GET")
-	router.HandleFunc("/tours/{userId}", tourHandler.GetToursForAuthor).Methods("GET")
+	//router.HandleFunc("/tours/{userId}", tourHandler.GetToursForAuthor).Methods("GET")
 	router.HandleFunc("/tours", tourHandler.UpdateTour).Methods("PUT")
 	router.HandleFunc("/tour/publish/{tourID}", tourHandler.PublishTour).Methods("PUT")
+	router.HandleFunc("/tour/archive/{tourID}", tourHandler.ArchiveTour).Methods("PUT")
+	router.HandleFunc("/tours/published", tourHandler.GetPublishedTours).Methods("GET")
 
 	//routes for equipment
 	router.HandleFunc("/equipments", equipmentHandler.Create).Methods("POST")

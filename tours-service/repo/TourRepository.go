@@ -84,3 +84,12 @@ func (repository *TourRepository) AddEquipmentToTour(tourID int, equipmentID int
 
 	return nil
 }
+
+func (repository *TourRepository) GetPublishedTours() ([]model.Tour, error) {
+	var tours []model.Tour
+	databaseResult := repository.DatabaseConnection.Where("status = ?", 1).Find(&tours)
+	if databaseResult.Error != nil {
+		return nil, databaseResult.Error
+	}
+	return tours, nil
+}

@@ -150,3 +150,53 @@ func (service *TourService) PublishTour(tourID string) (*model.Tour, error) {
 
 	return tour, nil
 }
+
+func (service *TourService) ArchiveTour(tourID string) (*model.Tour, error) {
+	tour, err := service.GetTourById(tourID)
+	if err != nil {
+		return nil, err
+	}
+	if tour.Status == 0 || tour.Status != 1 {
+		return nil, errors.New("tour can be tour can be archived only from published phase")
+	}
+	// Postavljanje vremena arhiviranja na trenutno vreme
+	currentTime := time.Now()
+	tour.ArchivedDateTime = currentTime
+	tour.Status = 2
+
+	// Ažuriranje ture u repozitorijumu
+	err = service.TourRepo.UpdateTour(tour)
+	if err != nil {
+		return nil, err
+	}
+
+	return tour, nil
+
+}
+
+func (service *TourService) GetPublishedTours() ([]model.Tour, error) {
+	// Retrieve published tours from the repository
+	publishedTours, err := service.TourRepo.GetPublishedTours()
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve published tours: %v", err)
+	}
+
+	// Iterate through the published tours and fetch associated equipments and tour points
+	for i := range publishedTours {
+		// Fetch and assign equipments to each tour
+		equipments, err := service.EquipmentRepo.GetEquipmentByTourID(publishedTours[i].ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get equipments for tour %d: %v", publishedTours[i].ID, err)
+		}
+		publishedTours[i].Equipments = equipments
+
+		// Fetch and assign tour points to each tour
+		tourPoints, err := service.TourPointRepo.GetTourPointsByTourId(publishedTours[i].ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get tour points for tour %d: %v", publishedTours[i].ID, err)
+		}
+		publishedTours[i].TourPoints = tourPoints
+	}
+
+	return publishedTours, nil
+}

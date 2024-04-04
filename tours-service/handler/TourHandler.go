@@ -4,7 +4,6 @@ import (
 	"database-example/model"
 	"database-example/service"
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 
@@ -54,21 +53,21 @@ func (handler *TourHandler) GetTourById(writer http.ResponseWriter, req *http.Re
 	json.NewEncoder(writer).Encode(tour)
 }
 
-func (handler *TourHandler) GetToursForAuthor(writer http.ResponseWriter, req *http.Request) {
-	id := mux.Vars(req)["userId"]
-	converterId, err := strconv.Atoi(id)
-	if err != nil {
-		fmt.Println("integer can't nbe converted to integer")
-	}
-	tours, err := handler.TourService.GetToursForAuthor(converterId)
-	writer.Header().Set("Content-Type", "application/json")
-	if err != nil {
-		writer.WriteHeader(http.StatusNotFound)
-		return
-	}
-	writer.WriteHeader(http.StatusOK)
-	json.NewEncoder(writer).Encode(tours)
-}
+// func (handler *TourHandler) GetToursForAuthor(writer http.ResponseWriter, req *http.Request) {
+// 	id := mux.Vars(req)["userId"]
+// 	converterId, err := strconv.Atoi(id)
+// 	if err != nil {
+// 		fmt.Println("integer can't nbe converted to integer")
+// 	}
+// 	tours, err := handler.TourService.GetToursForAuthor(converterId)
+// 	writer.Header().Set("Content-Type", "application/json")
+// 	if err != nil {
+// 		writer.WriteHeader(http.StatusNotFound)
+// 		return
+// 	}
+// 	writer.WriteHeader(http.StatusOK)
+// 	json.NewEncoder(writer).Encode(tours)
+// }
 
 func (handler *TourHandler) UpdateTour(writer http.ResponseWriter, req *http.Request) {
 	var tour model.Tour
@@ -134,6 +133,39 @@ func (handler *TourHandler) PublishTour(writer http.ResponseWriter, req *http.Re
 	writer.WriteHeader(http.StatusOK)
 	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(tour)
+}
+
+func (handler *TourHandler) ArchiveTour(writer http.ResponseWriter, req *http.Request) {
+	tourID := mux.Vars(req)["tourID"]
+	tour, err := handler.TourService.ArchiveTour(tourID)
+	if err != nil {
+		log.Printf("Error while archiving: %v", err)
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	writer.WriteHeader(http.StatusOK)
+	writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(writer).Encode(tour)
+}
+
+func (handler *TourHandler) GetPublishedTours(writer http.ResponseWriter, req *http.Request) {
+	// Call the GetPublishedTours method from TourService
+	publishedTours, err := handler.TourService.GetPublishedTours()
+	if err != nil {
+		log.Printf("Error retrieving published tours: %v", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with the fetched published tours
+	writer.WriteHeader(http.StatusOK)
+	writer.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(writer).Encode(publishedTours); err != nil {
+		log.Printf("Error encoding published tours: %v", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 //TODO: probably keypoint logic is added here i suppose. ask others about opinion
